@@ -23,12 +23,12 @@ describe("Milk Contract Test", async function () {
     it("Only users with DEPOSITOR_ROLE should deposit", async function () {
       const [owner, depositor, user] = await ethers.getSigners();
 
+      const depositorRole = await milk.DEPOSITOR_ROLE();
       const depositAmount = ethers.utils.parseUnits("100", 18);
 
       await expect(milk.connect(depositor).deposit(user.address, depositAmount))
-        .to.be.reverted;
+        .to.be.revertedWith(`AccessControl: account ${depositor.address.toLowerCase()} is missing role ${depositorRole}`);
 
-      const depositorRole = await milk.DEPOSITOR_ROLE();
       await milk.grantRole(depositorRole, depositor.address);
 
       await milk
@@ -47,13 +47,13 @@ describe("Milk Contract Test", async function () {
     beforeEach(async function () {
       const [owner, depositor, user] = await ethers.getSigners();
 
+      const depositorRole = await milk.DEPOSITOR_ROLE();
       const depositAmount = ethers.utils.parseUnits("10000", 18);
 
       await expect(
         milk.connect(depositor).deposit(user.address, depositAmount)
-      ).to.be.reverted;
+      ).to.be.revertedWith(`AccessControl: account ${depositor.address.toLowerCase()} is missing role ${depositorRole}`);
 
-      const depositorRole = await milk.DEPOSITOR_ROLE();
       await milk.grantRole(depositorRole, depositor.address);
 
       await milk
@@ -88,13 +88,13 @@ describe("Milk Contract Test", async function () {
     it("Only users with CONTRACT_ROLE should gameMint", async function () {
       const [owner, master, user, game] = await ethers.getSigners();
 
+      const role = await milk.CONTRACT_ROLE();
       const mintAmount = ethers.utils.parseUnits("1000", 18);
 
-      await expect(milk.connect(game).mint(user.address, mintAmount)).to.be
-        .reverted;
+      await expect(milk.connect(game).gameMint(user.address, mintAmount)).to.be
+        .revertedWith(`AccessControl: account ${game.address.toLowerCase()} is missing role ${role}`);
       const beforeBalance = await milk.balanceOf(user.address);
 
-      const role = await milk.CONTRACT_ROLE();
       await milk.grantRole(role, game.address);
 
       await milk
@@ -111,12 +111,12 @@ describe("Milk Contract Test", async function () {
     it("Only users with MASTER_ROLE should mint", async function () {
       const [owner, master, user] = await ethers.getSigners();
 
+      const masterRole = await milk.MASTER_ROLE();
       const mintAmount = ethers.utils.parseUnits("100", 18);
 
       await expect(milk.connect(master).mint(user.address, mintAmount)).to.be
-        .reverted;
+        .revertedWith(`AccessControl: account ${master.address.toLowerCase()} is missing role ${masterRole}`);
 
-      const masterRole = await milk.MASTER_ROLE();
       await milk.grantRole(masterRole, master.address);
 
       await milk
@@ -162,7 +162,7 @@ describe("Milk Contract Test", async function () {
             user.address,
             userBalance.add(ethers.utils.parseUnits("10", 18))
           )
-      ).to.be.reverted;
+      ).to.be.revertedWith('ERC20: burn amount exceeds balance');
     });
 
     it("Should withdraw up to balance", async function () {
@@ -194,7 +194,7 @@ describe("Milk Contract Test", async function () {
             user2.address,
             userBalance.add(ethers.utils.parseUnits("10", 18))
           )
-      ).to.be.reverted;
+      ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
     });
 
     it("Should transfer up to balance", async function () {
@@ -231,7 +231,7 @@ describe("Milk Contract Test", async function () {
             user.address,
             userBalance.add(ethers.utils.parseUnits("10", 18))
           )
-      ).to.be.reverted;
+      ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
     });
 
     it("Should burn up to balance", async function () {
