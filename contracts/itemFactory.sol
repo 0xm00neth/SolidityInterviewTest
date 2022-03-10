@@ -27,7 +27,7 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
     }
 
     enum EType {
-        BOX, MILK
+        MILK, BOX
     }
 
     /// @dev rewardType => (rewardRarity => data)
@@ -75,7 +75,7 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
         else {
             // This will pick a random number between 0 and 1 inc.
             // MILK or ITEMS.
-            rewardType = randomNum(entropy) % uint256(EType.BOX);
+            rewardType = _randomNum % (uint256(EType.BOX) + 1);
 
             // convert the reward mapping data to min and max
             (uint256 min, uint256 max, uint256[] memory ids) = abi.decode(
@@ -83,7 +83,7 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
             );
 
             // do some bit shifting magic to create random min max
-            uint256 rewardAmount = min + (randomNum(entropy)) % (max - min + 1);
+            uint256 rewardAmount = min + _randomNum % (max - min + 1);
 
             // Give a MILK reward
             if (rewardType == uint256(EType.MILK)) {
@@ -94,7 +94,7 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
 
             // Give an item reward
             else {
-                uint256 index = (randomNum(entropy)) % ids.length;
+                uint256 index = _randomNum % ids.length;
                 _mint(claimer, ids[index], rewardAmount, "");
                 rewardData = abi.encode(ids[index], rewardAmount);
             }
@@ -102,7 +102,7 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
 
         emit LogDailyClaim(claimer, rewardType, rewardRarity, rewardData);
 
-        require(_lastUpdate[claimer] + 60 * 60 * 24 < block.timestamp, "can claim once a day");
+        require(_lastUpdate[claimer] + 60 * 60 * 24 <= block.timestamp, "can claim once a day");
 
         // Claims are specific to the that pet, not the claimer or a combination of claimer and pet
         _lastUpdate[claimer] = block.timestamp;
@@ -149,7 +149,9 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
             rewardData, (uint256, uint256, uint256[])
         );
         require(max > min, "invalid min max value");
-        require(ids.length > 0, "empty ids");
+        if (rewardType != uint256(EType.MILK)) {
+            require(ids.length > 0, "empty ids");
+        }
         _rewardMapping[rewardType][rewardRarity] = rewardData;
     }
 
