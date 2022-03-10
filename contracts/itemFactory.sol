@@ -145,6 +145,11 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
     }
 
     function setReward(uint256 rewardType, uint256 rewardRarity, bytes calldata rewardData) external onlyRole(ADMIN_ROLE) {
+        (uint256 min, uint256 max, uint256[] memory ids) = abi.decode(
+            rewardData, (uint256, uint256, uint256[])
+        );
+        require(max > min, "invalid min max value");
+        require(ids.length > 0, "empty ids");
         _rewardMapping[rewardType][rewardRarity] = rewardData;
     }
 
