@@ -262,7 +262,7 @@ describe("ItemFactory Contract Test", async function () {
           {
             min: 12,
             max: 24,
-            ids: [5, 6],
+            ids: [],
           },
         ],
       ];
@@ -282,7 +282,7 @@ describe("ItemFactory Contract Test", async function () {
     });
 
     it("Should claim MILK or ITEMS", async function () {
-      const entropy = 103;
+      const entropy = 100;
       const tx = await itemFactory.connect(user).claim(user.address, entropy);
       const receipt = await tx.wait();
 

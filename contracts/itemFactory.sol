@@ -149,7 +149,7 @@ contract ItemFactory is ERC1155SupplyCC, AccessControl {
             rewardData, (uint256, uint256, uint256[])
         );
         require(max > min, "invalid min max value");
-        if (rewardType != uint256(EType.MILK)) {
+        if (rewardRarity != uint256(ERarity.LEGENDARY) && rewardType != uint256(EType.MILK)) {
             require(ids.length > 0, "empty ids");
         }
         _rewardMapping[rewardType][rewardRarity] = rewardData;
